@@ -1,0 +1,10 @@
+{
+	"name": "chatrooom",
+	"version": "1.0.0",
+	"description": "",
+	"author": "Edison Neo",
+	"private": true,
+	"scripts": {
+		"postinstall": "npm install express"
+	}
+}
