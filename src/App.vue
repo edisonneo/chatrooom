@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<img src="assets/logo.png">
+		<!-- <img src="assets/logo.png"> -->
 		<h1>{{ msg }}</h1>
 		<input type="email" name="email" id='email'>
 		<input type="password" name="password" id='password'>
