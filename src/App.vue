@@ -1,7 +1,7 @@
 <template>
-	<div id="header">
-		<!-- <img src="assets/logo.png"> -->
+	<div id="app">
 		<h1>{{ msg }}</h1>
+
 		<input type="email" name="email" id='email'>
 		<input type="password" name="password" id='password'>
 		<button @click='login'> Log In </button>
@@ -10,6 +10,13 @@
 		<pre>Logged In? {{ loggedIn }}</pre>
 		<!-- <button @click='pushToDb("asdds")'> PUSH </button> -->
 		
+
+		<router-link to="/foo">Go to Foo</router-link>
+    	<router-link to="/bar">Go to Bar</router-link>
+
+    	<router-view></router-view>
+
+
 	</div>
 </template>
 
@@ -19,7 +26,7 @@ import * as Firebase from 'firebase'
 
 
 export default {
-	name: 'header',
+	name: 'app',
 	data() {
 		return {
 			msg: 'Chatrooom',
@@ -92,7 +99,7 @@ export default {
 body{
 	background: #f9f9f9;
 }
-#header {
+#app {
 	font-family: 'Avenir', Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
