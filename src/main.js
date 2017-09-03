@@ -1,7 +1,13 @@
 import Vue from 'vue'
-import App from './App.vue'
+import Header from './Header.vue'
+import Chat from './Chat.vue'
 
 new Vue({
-  el: '#app',
-  render: h => h(App),
+  el: '#header',
+  render: h => h(Header),
+})
+
+new Vue({
+  el: '#chat',
+  render: h => h(Chat),
 })

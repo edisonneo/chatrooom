@@ -1,5 +1,5 @@
 <template>
-	<div id="app">
+	<div id="header">
 		<!-- <img src="assets/logo.png"> -->
 		<h1>{{ msg }}</h1>
 		<input type="email" name="email" id='email'>
@@ -19,7 +19,7 @@ import * as Firebase from 'firebase'
 
 
 export default {
-	name: 'app',
+	name: 'header',
 	data() {
 		return {
 			msg: 'Chatrooom',
@@ -89,7 +89,10 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
+body{
+	background: #f9f9f9;
+}
+#header {
 	font-family: 'Avenir', Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
