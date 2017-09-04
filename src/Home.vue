@@ -1,0 +1,160 @@
+<template>
+	<div id="home">
+		<p v-if='!user'>Please Log In or create an account.</p>
+		<div v-if='user' class="wrapper">
+			<div class="home__dashboard">
+				<div class="home__section">
+					<a @click='enterCreateMode'>New Chat Room</a>
+					<template v-if='createRoomMode'>
+						<input  type="text" name="room-name" v-model='pendingRoom.name'>
+						<button @click='createRoom'>Create</button>		
+						<button @click='exitCreateMode'>Cancel</button>
+					</template>					
+				</div>
+				<div class="home__section">
+					<h2>Rooms</h2>
+					<p v-if='userRooms.length == 0'>You are not in any rooms.</p>
+					<ul class='home__list' v-if='userRooms.length > 0'>
+						<li v-for='room in userRooms'>
+							<a @click='enterRoom(room)'>{{ room.name }}</a> 
+						</li>
+					</ul>
+				</div>
+			</div>	
+		</div>
+	</div>
+</template>
+
+<script>
+
+export default {
+	name: 'home',
+	props: ['database','user','authenticate'],
+	firebase() {
+		// const userId = firebase.auth().currentUser.uid
+		return{
+			// simple syntax, bind as an array by default
+    		rooms: this.database.ref('rooms'),
+		}
+	},
+	data() {
+		return {
+			createRoomMode: false,
+			pendingRoom:{
+				name: '',
+				id: '',
+				users: []
+			}
+		}
+	},
+	mounted () {
+	    this.authenticate.onAuthStateChanged(firebaseUser =>{
+				if(firebaseUser){
+					console.log('yes log in');
+				}
+				else{			
+					console.log('no log in');
+				}
+		});
+	},
+	computed: {
+		userRooms() {
+			var vm = this;
+			var userRooms = this.rooms.filter(function(room) {
+				var users = room.users;
+				return (users.includes(vm.user.uid))
+			});
+			
+			return userRooms;
+		}
+	},
+	methods: {
+		testing(){
+			console.log('test');
+		},
+		enterCreateMode(){
+			this.createRoomMode = true;
+
+		},
+		exitCreateMode(){
+			this.createRoomMode = false;
+
+		},
+		createRoom(){		
+			var vm = this;
+			var user = vm.user;
+			this.pendingRoom.users.push(user.uid);
+			
+			var roomRef = this.database.ref('rooms').push();
+			this.pendingRoom.id = roomRef.key;
+			roomRef.set(this.pendingRoom);
+			this.exitCreateMode();
+		},
+		enterRoom(room){
+			// router.push({ name: 'user', params: { userId }}) // -> /user/123
+			var router = this.$router;
+			var roomId = room.id;
+			router.push({ name: 'rooms', params: { roomId }}) // -> /user/123
+			// router.push('rooms') // -> /user/123
+		}
+	}
+}
+</script>
+
+<style lang="scss">
+
+$orange: #f89414;
+
+#home {
+	background: #eee;
+	font-family: 'Avenir', Helvetica, Arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-align: center;
+	color: #2c3e50;
+	margin-top: 60px;
+	padding: 40px 0px 16px;
+
+	.wrapper{
+
+		max-width: 992px;
+		width: 100%;
+		margin: 0 auto;
+	}
+}
+
+h1, h2 {
+	font-weight: normal;
+}
+
+ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+li {
+	display: inline-block;
+	margin: 0 10px;
+}
+
+a {
+	color: #42b983;
+}
+
+.home__section{
+	text-align: left;
+	background: #fff;
+	margin-bottom: 24px;
+	padding: 8px;
+
+}
+
+
+.home__list{
+	li{
+		display: block;
+		margin-bottom: 12px;
+	}
+}
+
+</style>

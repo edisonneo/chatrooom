@@ -4,17 +4,19 @@
 
 		<input type="email" name="email" id='email'>
 		<input type="password" name="password" id='password'>
-		<button @click='login'> Log In </button>
+		<button v-if='!loggedIn' @click='login'> Log In </button>
 		<button @click='signup'> Sign Up </button>
 		<button v-if='loggedIn' @click='logout'> Log Out </button>
+		<h4 v-if='loggedIn && currentUser'>{{ currentUser.email }}</h4>
 		<pre>Logged In? {{ loggedIn }}</pre>
+		<!-- <pre>{{ currentUser }}</pre> -->
 		<!-- <button @click='pushToDb("asdds")'> PUSH </button> -->
 		
 
-		<router-link to="/foo">Go to Foo</router-link>
-    	<router-link to="/bar">Go to Bar</router-link>
-
-    	<router-view></router-view>
+		<!-- <router-link to="/">Home</router-link> -->
+    	<!-- <router-link to="/chat">Chat</router-link> -->
+		
+    	<router-view :database="db" :authenticate="auth" :user="currentUser"></router-view>
 
 
 	</div>
@@ -24,30 +26,49 @@
 
 import * as Firebase from 'firebase'
 
+var firebaseApp = Firebase.initializeApp({
+        apiKey: 'AIzaSyAGd3Ivm0HgTVF4y5HHhQKjdm0FyMzzcuE',
+        authDomain: 'chatrooom-f07b5.firebaseapp.com',
+        databaseURL: 'https://chatrooom-f07b5.firebaseio.com'
+    })
+
+var db = firebaseApp.database();
+var auth = firebaseApp.auth();
 
 export default {
 	name: 'app',
+	firebase() {
+		return{
+			// simple syntax, bind as an array by default
+    		
+		}
+	},
 	data() {
 		return {
 			msg: 'Chatrooom',
 			room: null,
 			precision: 6, // default precision
-			db: null, // assign Firebase SDK later,
-			auth: null,
-			loggedIn: false
+			db: db, // assign Firebase SDK later,
+			auth: auth,
+			loggedIn: false,
+			welcome: 'ASDASDASDADSSD',
+			currentUser: null
 		}
 	},
-	mounted () {
-	    // init the database client by given Firebase's API key
-	    this.db = Firebase.initializeApp({
-	        apiKey: 'AIzaSyAGd3Ivm0HgTVF4y5HHhQKjdm0FyMzzcuE',
-	        authDomain: 'chatrooom-f07b5.firebaseapp.com',
-	        databaseURL: 'https://chatrooom-f07b5.firebaseio.com'
-	    })
+	created(){
+		// init the database client by given Firebase's API key
+	    // this.db = Firebase.initializeApp({
+	    //     apiKey: 'AIzaSyAGd3Ivm0HgTVF4y5HHhQKjdm0FyMzzcuE',
+	    //     authDomain: 'chatrooom-f07b5.firebaseapp.com',
+	    //     databaseURL: 'https://chatrooom-f07b5.firebaseio.com'
+	    // })
 
-	    this.auth = this.db.auth();
+	    // this.auth = this.db.auth();
 
 	    this.authState();
+	},
+	mounted () {
+	    
 	},
 	methods: {
 		testing(){
@@ -66,11 +87,20 @@ export default {
 
 		},
 		signup(){
+			var vm = this;
 			var email = document.getElementById('email').value;
 			var password = document.getElementById('password').value;
 
 			var promise = this.auth.createUserWithEmailAndPassword(email, password);
-			promise.catch(e => console.log(e.message));			
+			promise.then(user =>{
+				vm.db.ref().child("users").child(user.uid).set({
+		      		email: user.email,
+		        });
+			});
+			promise.catch(e => {
+				console.log(e.message);
+				
+			});			
 		},
 		logout(){
 			this.auth.signOut();
@@ -78,17 +108,22 @@ export default {
 		},
 		authState(){
 			var vm = this;
-			var auth = this.db.auth();
+			var auth = this.auth;
 			auth.onAuthStateChanged(firebaseUser =>{
 				if(firebaseUser){
-					console.log(firebaseUser)
+					// console.log(firebaseUser)
 					console.log('yes log in');
 					this.loggedIn = true;
+					vm.currentUser = firebaseUser;
 				}
 				else{
+					vm.currentUser = null;
 					console.log('no log in');
 				}
 			})
+		},
+		createNewRoom(){
+			console.log('create new room')
 		}
 		
 	}

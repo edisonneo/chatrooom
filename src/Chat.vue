@@ -55,6 +55,7 @@ export default {
 	    // this.auth = this.db.auth();
 
 	    // this.authState();
+
 	},
 	methods: {
 		testing(){

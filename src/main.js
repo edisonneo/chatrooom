@@ -1,17 +1,20 @@
 import Vue from 'vue'
+import VueFire from 'vuefire'
 import Router from 'vue-router'
 import App from './App.vue'
+import Home from './Home.vue'
+import Room from './Room.vue'
 import Chat from './Chat.vue'
 
 
 Vue.use(Router)
+Vue.use(VueFire)
 
-const Foo = { template: '#chat' }
-const Bar = { template: '<div>bar</div>' }
 
 const routes = [
-  { path: '/foo', component: Chat },
-  { path: '/bar', component: Bar }
+  { path: '/', component: Home ,props: true},
+  { path: '/rooms/:roomId', name: 'rooms', component: Room, props: true},
+  { path: '/chat', component: Chat, props: true}
 ]
 
 const router = new Router({
@@ -26,8 +29,3 @@ new Vue({
   render: h => h(App),
 })
 
-// new Vue({
-// 	// router,
-//   	el: '#chat',
-//   	render: h => h(Chat),
-// })
