@@ -27,14 +27,16 @@
 
 <script>
 
+import { mapState } from 'vuex';
+
 export default {
 	name: 'home',
-	props: ['database','user','authenticate'],
+	props: ['authenticate'],
 	firebase() {
 		// const userId = firebase.auth().currentUser.uid
 		return{
 			// simple syntax, bind as an array by default
-    		rooms: this.database.ref('rooms'),
+    		rooms: this.firebase.database().ref('rooms'),
 		}
 	},
 	data() {
@@ -56,16 +58,26 @@ export default {
 					console.log('no log in');
 				}
 		});
+
+		// console.log(this.rooms[0].users);
 	},
 	computed: {
+		
+		...mapState(['user','firebase']),
+
 		userRooms() {
 			var vm = this;
+			var result = [];
 			var userRooms = this.rooms.filter(function(room) {
 				var users = room.users;
-				return (users.includes(vm.user.uid))
+				Object.keys(users).forEach(key => {
+					if(users[key] == vm.user.uid){
+						result.push(room);
+					}
+				})
 			});
 			
-			return userRooms;
+			return result;
 		}
 	},
 	methods: {
@@ -83,12 +95,19 @@ export default {
 		createRoom(){		
 			var vm = this;
 			var user = vm.user;
-			this.pendingRoom.users.push(user.uid);
 			
-			var roomRef = this.database.ref('rooms').push();
-			this.pendingRoom.id = roomRef.key;
-			roomRef.set(this.pendingRoom);
-			this.exitCreateMode();
+			if(this.pendingRoom.name == ''){
+				console.log('no empty room name');
+				return false;
+			}
+			else{
+				this.pendingRoom.users.push(user.uid);
+		
+				var roomRef = this.firebase.database().ref('rooms').push();
+				this.pendingRoom.id = roomRef.key;
+				roomRef.set(this.pendingRoom);
+				this.exitCreateMode();
+			}	
 		},
 		enterRoom(room){
 			// router.push({ name: 'user', params: { userId }}) // -> /user/123

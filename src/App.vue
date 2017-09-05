@@ -1,22 +1,15 @@
 <template>
 	<div id="app">
-		<h1>{{ msg }}</h1>
+		<h1><a @click='goHome'>{{ title }}</a></h1>
 
-		<input type="email" name="email" id='email'>
-		<input type="password" name="password" id='password'>
-		<button v-if='!loggedIn' @click='login'> Log In </button>
-		<button @click='signup'> Sign Up </button>
+		<input v-if='!user' type="email" name="email" id='email'>
+		<input v-if='!user'type="password" name="password" id='password'>
+		<button v-if='!user' @click='login'> Log In </button>
+		<button v-if='!user' @click='signup'> Sign Up </button>
 		<button v-if='loggedIn' @click='logout'> Log Out </button>
-		<h4 v-if='loggedIn && currentUser'>{{ currentUser.email }}</h4>
-		<pre>Logged In? {{ loggedIn }}</pre>
-		<!-- <pre>{{ currentUser }}</pre> -->
-		<!-- <button @click='pushToDb("asdds")'> PUSH </button> -->
+		<h4 v-if='user'>{{ currentUser.email }}</h4>
 		
-
-		<!-- <router-link to="/">Home</router-link> -->
-    	<!-- <router-link to="/chat">Chat</router-link> -->
-		
-    	<router-view :database="db" :authenticate="auth" :user="currentUser"></router-view>
+    	<router-view v-if="user" :authenticate="auth"></router-view>
 
 
 	</div>
@@ -25,6 +18,7 @@
 <script>
 
 import * as Firebase from 'firebase'
+import { mapState } from 'vuex';
 
 var firebaseApp = Firebase.initializeApp({
         apiKey: 'AIzaSyAGd3Ivm0HgTVF4y5HHhQKjdm0FyMzzcuE',
@@ -34,6 +28,8 @@ var firebaseApp = Firebase.initializeApp({
 
 var db = firebaseApp.database();
 var auth = firebaseApp.auth();
+
+console.log(Firebase.database.ServerValue.TIMESTAMP);
 
 export default {
 	name: 'app',
@@ -45,26 +41,31 @@ export default {
 	},
 	data() {
 		return {
-			msg: 'Chatrooom',
+			title: 'Chatrooom',
 			room: null,
 			precision: 6, // default precision
 			db: db, // assign Firebase SDK later,
 			auth: auth,
 			loggedIn: false,
 			welcome: 'ASDASDASDADSSD',
-			currentUser: null
 		}
 	},
+	computed:{ 
+		...mapState(['user']),
+    },
+	beforeCreate () {
+		
+		this.$store.commit('setFirebase', firebaseApp || false);        
+		
+		auth.onAuthStateChanged((user) => {
+        	// initially user = null, after auth it will be either <fb_user> or false
+        	this.$store.commit('setUser', user || false);
+        	// if(!user){
+        		// this.$router.push({ path: '/', query: { plan: 'private' }})
+        	// }        
+      });
+    },
 	created(){
-		// init the database client by given Firebase's API key
-	    // this.db = Firebase.initializeApp({
-	    //     apiKey: 'AIzaSyAGd3Ivm0HgTVF4y5HHhQKjdm0FyMzzcuE',
-	    //     authDomain: 'chatrooom-f07b5.firebaseapp.com',
-	    //     databaseURL: 'https://chatrooom-f07b5.firebaseio.com'
-	    // })
-
-	    // this.auth = this.db.auth();
-
 	    this.authState();
 	},
 	mounted () {
@@ -122,8 +123,9 @@ export default {
 				}
 			})
 		},
-		createNewRoom(){
-			console.log('create new room')
+		goHome(){
+			var router = this.$router;
+			router.push('/');
 		}
 		
 	}

@@ -3,14 +3,23 @@
 		<template v-if='!user'>
 			<h1>You are not part of this room.</h1>
 		</template>
-		<template v-if='user'>
+		<template v-if='!chatAccess'>
+			<a @click='joinChat'>Join Chat</a>
+		</template>
+		<template v-if='user && chatAccess'>
 			<h1>{{ room.name }}</h1>
+			<ul>
+				<li v-for='user in roomUsers'>{{ user.email }}</li>
+			</ul>
+			<a>Invite someone to chat</a>
 			<div id="room__chat">
 				<div class="chat__main">
-					<div class="wrapper">
+					<div class="wrapper" id='chatWrapper'>
 						<div v-for='msg in room.msgs'class="chat__single">
 							<div class="chat__text" :class="msg.user == user.uid ? 'chat__text--user':'chat__text--other'" >
+								<span v-if='!(msg.user == user.uid)'>{{ getUser('email', msg.user) }}</span>
 								<p>{{ msg.text }}</p>
+								<h6>{{ showTimeCreated(msg.created_at) }}</h6>
 							</div>
 						</div>
 					</div>
@@ -29,47 +38,62 @@
 <script>
 
 import * as Firebase from 'firebase'
-
+import { mapState } from 'vuex';
+import moment from 'moment';
 
 export default {
 	name: 'room',
-	props: ['database', 'user'],
 	firebase() {
 		return{
 			// simple syntax, bind as an array by default
     		// room: this.database.ref('rooms/' + this.$route.roomId),
+    		users: this.firebase.database().ref('users'),
     		room: {
-		      source: this.database.ref('rooms/' + this.$route.params.roomId),
-		      // optionally bind as an object
-		      asObject: true,
-		      // optionally provide the cancelCallback
-		      cancelCallback: function () {},
-		      // this is called once the data has been retrieved from firebase
-		      readyCallback: function () {}
+    			source: this.firebase.database().ref('rooms/' + this.$route.params.roomId),
+    			// optionally bind as an object
+		     	asObject: true,
+		      	// optionally provide the cancelCallback
+		      	cancelCallback: function () {},
+		      	// this is called once the data has been retrieved from firebase
+		      	readyCallback: function () {
+		      		this.checkUserAccessToChat(this.user);
+		      	}
 		    }
 		}
 	},
 	data() {
 		return {
 			pendingMsg: {
-				user: this.user.uid,
 				text: ''
-			}
+			},
+			chatAccess: false
+		}
+	},
+	computed: {
+		
+		...mapState(['user','firebase']),
+
+		roomUsers(){
+			var vm = this
+			var xxx = this.room.users;
+			var result = []
+			// console.log(Array.isArray(this.users));
+			this.users.filter(user => {
+				Object.keys(xxx).forEach(key => {		
+				    if(xxx[key] == user['.key']){
+				    	result.push(user);
+				    }
+				});
+			});
+			return result;
 		}
 	},
 	mounted () {
-		// console.log(this.$route);
-		// console.log(this.room);
-	    // init the database client by given Firebase's API key
-	    // this.db = Firebase.initializeApp({
-	    //     apiKey: 'AIzaSyAGd3Ivm0HgTVF4y5HHhQKjdm0FyMzzcuE',
-	    //     authDomain: 'chatrooom-f07b5.firebaseapp.com',
-	    //     databaseURL: 'https://chatrooom-f07b5.firebaseio.com'
-	    // })
+		
 
-	    // this.auth = this.db.auth();
-
-	    // this.authState();
+		this.$nextTick(function () {
+		
+		})
 
 	},
 	methods: {
@@ -80,14 +104,52 @@ export default {
 			var vm = this;
 			var input = document.getElementById('sendText');
 			var button = document.getElementById('sendButton');
+			var chatWrapper = document.getElementById("chatWrapper");
 			// Check hasClass
 			if ( (" " + button.className + " ").replace(/[\n\t]/g, " ").indexOf(" disabled ") > -1 ){
 				return false;
 			} 
-
-			var roomRef = this.database.ref('rooms/' + this.$route.params.roomId).child("msgs").push().set(this.pendingMsg);
+			this.pendingMsg.user = this.user.uid;
+			this.pendingMsg.created_at = Firebase.database.ServerValue.TIMESTAMP;
+			var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("msgs").push().set(this.pendingMsg);
 
 			this.pendingMsg.text = '';
+
+			
+			chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
+			console.log(chatWrapper.scrollTop)
+		},
+		checkUserAccessToChat(user){
+			var vm = this;
+			var uid = user.uid;
+			var users = this.room.users
+			Object.keys(users).forEach(key => {
+			    if(users[key] == uid){
+			    	vm.chatAccess = true;
+			    }
+			});
+		},
+		joinChat(){
+			var vm = this;
+			var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users").push().set(this.user.uid);
+			roomRef.then(res =>{
+				vm.chatAccess = true;
+			})	
+			.catch(e =>{
+				console.log(e);
+			});
+		},
+		getUser(prop, userId){
+			// console.log(userId);
+			var user = this.users.filter(user=>{
+				return(user['.key'] == userId);
+				// console.log(user['.key'] == userId);
+			});
+			return user[0][prop];
+		},
+		showTimeCreated(date){
+			var time = moment(date).fromNow();
+			return time;
 		}
 	}
 }
@@ -164,12 +226,13 @@ a {
 	align-items: center;	
 	padding: 40px 0px 0px;
 	flex-wrap: wrap;
+	height: 400px;
 
 	.wrapper{
+		overflow: scroll;
+		height: 100%;
 		max-width: 992px;
 		width: 100%;
-		display: flex;
-		flex-wrap: wrap;
 		border-bottom: 1px solid #ddd;
 	}
 }
