@@ -1,13 +1,14 @@
 <template>
 	<div id="app">
 		<h1><a @click='goHome'>{{ title }}</a></h1>
-
+		<h2 v-if="room && !user">Sign up with an email to join the chat room!</h2>
+		
 		<input v-if='!user' type="email" name="email" id='email'>
 		<input v-if='!user'type="password" name="password" id='password'>
 		<button v-if='!user' @click='login'> Log In </button>
 		<button v-if='!user' @click='signup'> Sign Up </button>
-		<button v-if='loggedIn' @click='logout'> Log Out </button>
-		<h4 v-if='user'>{{ currentUser.email }}</h4>
+		<button v-if='user' @click='logout'> Log Out </button>
+		<h4 v-if='user'>{{ user.email }}</h4>
 		
     	<router-view v-if="user" :authenticate="auth"></router-view>
 
@@ -29,8 +30,6 @@ var firebaseApp = Firebase.initializeApp({
 var db = firebaseApp.database();
 var auth = firebaseApp.auth();
 
-console.log(Firebase.database.ServerValue.TIMESTAMP);
-
 export default {
 	name: 'app',
 	firebase() {
@@ -42,11 +41,10 @@ export default {
 	data() {
 		return {
 			title: 'Chatrooom',
-			room: null,
+			room: false,
 			precision: 6, // default precision
 			db: db, // assign Firebase SDK later,
 			auth: auth,
-			loggedIn: false,
 			welcome: 'ASDASDASDADSSD',
 		}
 	},
@@ -60,13 +58,16 @@ export default {
 		auth.onAuthStateChanged((user) => {
         	// initially user = null, after auth it will be either <fb_user> or false
         	this.$store.commit('setUser', user || false);
-        	// if(!user){
-        		// this.$router.push({ path: '/', query: { plan: 'private' }})
-        	// }        
       });
     },
 	created(){
-	    this.authState();
+	 	var path = this.$route.path;   
+	 	if(path.indexOf('rooms') !== -1){
+	 		this.room = true;
+	 	}
+	 	else{
+	 		this.room = false;
+	 	}
 	},
 	mounted () {
 	    
@@ -106,22 +107,6 @@ export default {
 		logout(){
 			this.auth.signOut();
 			this.loggedIn = false;
-		},
-		authState(){
-			var vm = this;
-			var auth = this.auth;
-			auth.onAuthStateChanged(firebaseUser =>{
-				if(firebaseUser){
-					// console.log(firebaseUser)
-					console.log('yes log in');
-					this.loggedIn = true;
-					vm.currentUser = firebaseUser;
-				}
-				else{
-					vm.currentUser = null;
-					console.log('no log in');
-				}
-			})
 		},
 		goHome(){
 			var router = this.$router;

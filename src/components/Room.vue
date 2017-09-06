@@ -12,9 +12,10 @@
 				<li v-for='user in roomUsers'>{{ user.email }}</li>
 			</ul>
 			<a>Invite someone to chat</a>
+			<a @click='leaveChat'>Leave Chat</a>
 			<div id="room__chat">
 				<div class="chat__main">
-					<div class="wrapper" id='chatWrapper'>
+					<div class="wrapper" ref="chatWrapper" id='chatWrapper'>
 						<div v-for='msg in room.msgs'class="chat__single">
 							<div class="chat__text" :class="msg.user == user.uid ? 'chat__text--user':'chat__text--other'" >
 								<span v-if='!(msg.user == user.uid)'>{{ getUser('email', msg.user) }}</span>
@@ -56,7 +57,10 @@ export default {
 		      	cancelCallback: function () {},
 		      	// this is called once the data has been retrieved from firebase
 		      	readyCallback: function () {
-		      		this.checkUserAccessToChat(this.user);
+		      		this.checkUserAccessToChat(this.user);		      		
+		      		this.$nextTick(function () {
+						// this.scrollChatToBottom();		
+					})
 		      	}
 		    }
 		}
@@ -66,9 +70,18 @@ export default {
 			pendingMsg: {
 				text: ''
 			},
-			chatAccess: false
+			chatAccess: false,
+			scrolled: false
 		}
 	},
+	watch: {
+        chatAccess(){
+        	this.scrollChatToBottom();
+            //code here executes whenever the uploads array changes 
+            //and runs AFTER the dom is updated, could use this in
+            //the parent component
+        }
+    },
 	computed: {
 		
 		...mapState(['user','firebase']),
@@ -88,12 +101,11 @@ export default {
 			return result;
 		}
 	},
-	mounted () {
-		
+	created(){
+		  
 
-		this.$nextTick(function () {
-		
-		})
+	},
+	mounted () {
 
 	},
 	methods: {
@@ -104,20 +116,26 @@ export default {
 			var vm = this;
 			var input = document.getElementById('sendText');
 			var button = document.getElementById('sendButton');
-			var chatWrapper = document.getElementById("chatWrapper");
 			// Check hasClass
 			if ( (" " + button.className + " ").replace(/[\n\t]/g, " ").indexOf(" disabled ") > -1 ){
 				return false;
-			} 
+			}
+
 			this.pendingMsg.user = this.user.uid;
 			this.pendingMsg.created_at = Firebase.database.ServerValue.TIMESTAMP;
 			var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("msgs").push().set(this.pendingMsg);
+			
+			roomRef.then(res => {
+				this.scrollChatToBottom();
+			});
 
 			this.pendingMsg.text = '';
-
-			
-			chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
-			console.log(chatWrapper.scrollTop)
+		
+		},
+		scrollChatToBottom(){
+			this.$nextTick(function(){
+				this.$refs.chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
+			});
 		},
 		checkUserAccessToChat(user){
 			var vm = this;
@@ -134,6 +152,7 @@ export default {
 			var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users").push().set(this.user.uid);
 			roomRef.then(res =>{
 				vm.chatAccess = true;
+				vm.scrollChatToBottom();		
 			})	
 			.catch(e =>{
 				console.log(e);
@@ -150,6 +169,29 @@ export default {
 		showTimeCreated(date){
 			var time = moment(date).fromNow();
 			return time;
+		},
+		leaveChat(){
+			var vm = this;
+			var router = this.$router;
+			var users = this.room.users;
+			Object.keys(users).forEach(key => {
+				if(users[key] == vm.user.uid){
+					
+					var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users/" + key).remove();		
+					roomRef.then(res=>{
+						console.log('removed')
+						router.push('/');
+					}).catch(e=>{ console.log(e.msg)})
+
+				}
+			});
+			
+
+
+
+			
+
+
 		}
 	}
 }
@@ -224,9 +266,9 @@ a {
 	display: flex;
 	justify-content: center;
 	align-items: center;	
-	padding: 40px 0px 0px;
+	margin-top: 40px;
 	flex-wrap: wrap;
-	height: 400px;
+	height: 300px;
 
 	.wrapper{
 		overflow: scroll;
