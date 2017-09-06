@@ -1,13 +1,10 @@
 <template>
 	<div id="room">
-		<template v-if='!user'>
-			<h1>You are not part of this room.</h1>
-		</template>
 		<template v-if='!chatAccess'>
 			<a @click='joinChat'>Join Chat</a>
 		</template>
 		<template v-if='user && chatAccess'>
-			<h1>{{ room.name }}</h1>
+			<p>User admin? {{ isAdmin}}</p>
 			<ul>
 				<li v-for='user in roomUsers'>{{ user.email }}</li>
 			</ul>
@@ -58,8 +55,10 @@ export default {
 		      	// this is called once the data has been retrieved from firebase
 		      	readyCallback: function () {
 		      		this.checkUserAccessToChat(this.user);		      		
+		      		this.checkIfUserIsAdmin(this.user);
 		      		this.$nextTick(function () {
-						// this.scrollChatToBottom();		
+						// this.scrollChatToBottom();
+
 					})
 		      	}
 		    }
@@ -71,6 +70,7 @@ export default {
 				text: ''
 			},
 			chatAccess: false,
+			isAdmin: false,
 			scrolled: false
 		}
 	},
@@ -102,12 +102,20 @@ export default {
 		}
 	},
 	created(){
-		  
-
+		// var vm = this;
+		// var msgRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("msgs");
+		// msgRef.on('value', function(snapshot) {
+		// 	console.log('messages changed');
+		// });
 	},
 	mounted () {
 
 	},
+	updated(){
+		if(this.$refs.chatWrapper){
+			this.scrollChatToBottom();
+		}
+    },
 	methods: {
 		testing(){
 			console.log('test');
@@ -133,8 +141,10 @@ export default {
 		
 		},
 		scrollChatToBottom(){
+			
 			this.$nextTick(function(){
-				this.$refs.chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
+				var chatWrapper = document.getElementById('chatWrapper');
+				chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
 			});
 		},
 		checkUserAccessToChat(user){
@@ -146,6 +156,17 @@ export default {
 			    	vm.chatAccess = true;
 			    }
 			});
+		},
+		checkIfUserIsAdmin(user){
+			var vm = this;
+			var uid = user.uid;
+			var admin = this.room.admin
+			if(admin == uid){
+				this.isAdmin = true;
+			}
+			else{
+				this.isAdmin = false;
+			}
 		},
 		joinChat(){
 			var vm = this;

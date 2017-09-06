@@ -1,6 +1,7 @@
 <template>
 	<div id="app">
 		<h1><a @click='goHome'>{{ title }}</a></h1>
+		<!-- <h2 v-if="!room && !user">Login or Sign up with an email to start using the app!</h2> -->
 		<h2 v-if="room && !user">Sign up with an email to join the chat room!</h2>
 		
 		<input v-if='!user' type="email" name="email" id='email'>
@@ -61,20 +62,31 @@ export default {
       });
     },
 	created(){
-	 	var path = this.$route.path;   
-	 	if(path.indexOf('rooms') !== -1){
-	 		this.room = true;
-	 	}
-	 	else{
-	 		this.room = false;
-	 	}
+	 	this.checkIfRoom();
+	},
+	updated(){
+
 	},
 	mounted () {
 	    
 	},
+	watch:{
+		'$route': function(){
+			this.checkIfRoom();
+		}
+	},
 	methods: {
 		testing(){
 			console.log('test');
+		},
+		checkIfRoom(){
+			var path = this.$route.path;   
+		 	if(path.indexOf('rooms') !== -1){
+		 		this.room = true;
+		 	}
+		 	else{
+		 		this.room = false;
+		 	}
 		},
 		pushToDb(val){
 			this.db.database().ref().push().set(val)

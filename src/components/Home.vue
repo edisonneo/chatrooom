@@ -45,6 +45,7 @@ export default {
 			pendingRoom:{
 				name: '',
 				id: '',
+				admin: '',
 				users: []
 			}
 		}
@@ -102,10 +103,11 @@ export default {
 			}
 			else{
 				this.pendingRoom.users.push(user.uid);
+				this.pendingRoom.admin = user.uid;
 		
 				var roomRef = this.firebase.database().ref('rooms').push();
 				this.pendingRoom.id = roomRef.key;
-				roomRef.set(this.pendingRoom);
+				roomRef.set(this.pendingRoom);				
 				this.exitCreateMode();
 			}	
 		},
