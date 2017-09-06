@@ -88,16 +88,17 @@ export default {
 
 		roomUsers(){
 			var vm = this
-			var xxx = this.room.users;
+			var roomUsers = this.room.users;
 			var result = []
 			// console.log(Array.isArray(this.users));
-			this.users.filter(user => {
-				Object.keys(xxx).forEach(key => {		
-				    if(xxx[key] == user['.key']){
+			this.users.filter(user => {				
+				Object.keys(roomUsers).forEach(key => {		
+				    if(roomUsers[key].id == user['.key']){
 				    	result.push(user);
 				    }
 				});
 			});
+
 			return result;
 		}
 	},
@@ -152,10 +153,16 @@ export default {
 			var uid = user.uid;
 			var users = this.room.users
 			Object.keys(users).forEach(key => {
-			    if(users[key] == uid){
-			    	vm.chatAccess = true;
-			    }
-			});
+				if(users[key].id == vm.user.uid){
+					vm.chatAccess = true;
+				}
+			})
+
+			// users.forEach(function(user){
+			// 	if(user.id == uid){
+			// 		vm.chatAccess = true;
+			// 	}
+			// });
 		},
 		checkIfUserIsAdmin(user){
 			var vm = this;
@@ -170,7 +177,11 @@ export default {
 		},
 		joinChat(){
 			var vm = this;
-			var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users").push().set(this.user.uid);
+			var newUser = {
+				id: vm.user.uid,
+				status: 'active'
+			}
+			var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users").push().set(newUser);
 			roomRef.then(res =>{
 				vm.chatAccess = true;
 				vm.scrollChatToBottom();		
@@ -196,7 +207,7 @@ export default {
 			var router = this.$router;
 			var users = this.room.users;
 			Object.keys(users).forEach(key => {
-				if(users[key] == vm.user.uid){
+				if(users[key].id == vm.user.uid){
 					
 					var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users/" + key).remove();		
 					roomRef.then(res=>{

@@ -72,7 +72,7 @@ export default {
 			var userRooms = this.rooms.filter(function(room) {
 				var users = room.users;
 				Object.keys(users).forEach(key => {
-					if(users[key] == vm.user.uid){
+					if(users[key].id == vm.user.uid){
 						result.push(room);
 					}
 				})
@@ -102,8 +102,14 @@ export default {
 				return false;
 			}
 			else{
-				this.pendingRoom.users.push(user.uid);
+				var adminUser = {
+					status: "active",
+					id: user.uid,					
+				}
+
+				this.pendingRoom.users.push(adminUser);
 				this.pendingRoom.admin = user.uid;
+				console.log(this.pendingRoom);
 		
 				var roomRef = this.firebase.database().ref('rooms').push();
 				this.pendingRoom.id = roomRef.key;
