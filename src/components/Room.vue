@@ -7,9 +7,9 @@
 			<!-- <p>User admin? {{ isAdmin}}</p> -->
 			<div class="room__header">
 				<div class="wrapper">
-					<ul class='room__list room__list--users'>
+					<!-- <ul class='room__list room__list--users'>
 						<li v-for='user in roomUsers'>{{ user.email }}</li>
-					</ul>
+					</ul> -->
 					<ul class='room__list room__list--actions'>
 						<li><a>Invite someone to chat</a></li>
 						<li><a @click='leaveChat'>Leave Chat</a></li>	

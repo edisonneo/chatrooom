@@ -142,6 +142,28 @@ export default {
 
 $orange: #f89414;
 
+$tablet-width: 768px;
+$desktop-width: 1024px;
+
+@mixin phone {
+  @media (max-width: #{$tablet-width - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$tablet-width}) and (max-width: #{$desktop-width - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$desktop-width}) {
+    @content;
+  }
+}
+  
+
 html{
 	margin: 0;
 }
@@ -242,11 +264,28 @@ button{
 	h2{
 		font-size: 18px;
 		margin: 24px 0px;
+		@include phone{
+			width: 100%;
+			margin: 4px 0px;
+		}
+	}
+
+	input{
+		@include phone{
+			width: 100%;
+			margin: 4px 0px;
+		}
+	}
+
+	button{
+		@include phone{
+			width: 100%;
+			margin: 4px 0px;
+		}
 	}
 }
 
 .page-wrapper{
-	border: 1px solid;
 	padding-top: 14px;
 	width: 100%;
 	height: 100vh;
