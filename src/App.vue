@@ -1,17 +1,26 @@
 <template>
 	<div id="app">
-		<h1><a @click='goHome'>{{ title }}</a></h1>
-		<!-- <h2 v-if="!room && !user">Login or Sign up with an email to start using the app!</h2> -->
-		<h2 v-if="room && !user">Sign up with an email to join the chat room!</h2>
-		
-		<input v-if='!user' type="email" name="email" id='email'>
-		<input v-if='!user'type="password" name="password" id='password'>
-		<button v-if='!user' @click='login'> Log In </button>
-		<button v-if='!user' @click='signup'> Sign Up </button>
-		<button v-if='user' @click='logout'> Log Out </button>
-		<h4 v-if='user'>{{ user.email }}</h4>
-		
-    	<router-view v-if="user" :authenticate="auth"></router-view>
+		<div class="nav">
+			<div class='wrapper'>
+				<div class="nav__top">
+					<h1><a @click='goHome'>{{ title }}</a></h1>
+					<h4 v-if='user'>{{ user.email }}</h4>
+					<button v-if='user'  @click='logout'> Log Out </button>					
+				</div>
+				<div class="nav__bottom">
+					<input v-if='!user' type="email" name="email" id='email' placeholder="Email">
+					<input v-if='!user'type="password" name="password" id='password' placeholder="Password">
+					<button v-if='!user' @click='login'> Log In </button>
+					<button v-if='!user' @click='signup'> Sign Up </button>		
+					<h2 v-if="room && !user">Sign up with an email to join the chat room!</h2>		
+				</div>
+			</div>
+		</div>	
+		<div class="page-wrapper">
+			
+			<router-view v-if="user" :authenticate="auth"></router-view>	
+		</div>
+    	
 
 
 	</div>
@@ -130,8 +139,15 @@ export default {
 </script>
 
 <style lang="scss">
+
+$orange: #f89414;
+
+html{
+	margin: 0;
+}
 body{
-	background: #f9f9f9;
+	margin: 0;
+	background: #fff;
 }
 #app {
 	font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -159,4 +175,82 @@ li {
 a {
 	color: #42b983;
 }
+
+input{
+	border-radius: 5px;
+	height: 36px;
+	border: none;
+	background: #f8f8f8;
+	box-shadow: none;
+	padding: 0px 8px;
+	font-size: 14px;
+	margin-right: 8px;
+	&:focus{
+		outline: none;
+	}
+}
+
+button{
+	background: $orange;
+	border: none;
+	padding: 12px 18px;
+	box-shadow: none;
+	max-height: 40px;
+	color: #fff;
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	font-size: 12px;
+	font-weight: 600;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.nav{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	background: #f9f9f9;
+	padding: 12px 0px 24px;
+	.wrapper{
+		max-width: 992px;
+		margin: 0 auto;
+		padding: 0px 12px;
+	}
+}
+
+.nav__top{
+	display: flex;
+	align-items: center;
+	padding: 0px;
+	h1{
+		margin-right: 8px;
+		margin: 0px 8px 0px 0px;
+		font-size: 22px;
+		font-weight: bold;
+	}
+	h4{
+		margin-left: auto;
+		margin-right: 8px;
+		margin: 0px 8px 0px auto;
+	}
+
+}
+
+.nav__bottom{
+	padding: 0px;
+	
+	h2{
+		font-size: 18px;
+		margin: 24px 0px;
+	}
+}
+
+.page-wrapper{
+	border: 1px solid;
+	padding-top: 14px;
+	width: 100%;
+	height: 100vh;
+}
+
+
 </style>

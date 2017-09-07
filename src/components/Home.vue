@@ -133,14 +133,13 @@ export default {
 $orange: #f89414;
 
 #home {
-	background: #eee;
+	background: #fff;
 	font-family: 'Avenir', Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
-	margin-top: 60px;
-	padding: 40px 0px 16px;
+	// padding: 40px 0px 16px;
 
 	.wrapper{
 
@@ -170,10 +169,16 @@ a {
 
 .home__section{
 	text-align: left;
-	background: #fff;
+	background: rgba(0,0,0,0.0125);
 	margin-bottom: 24px;
 	padding: 8px;
-
+	border-radius: 10px;
+	h2{
+		margin: 8px 0px;
+	}
+	input{
+		background: #eee;
+	}
 }
 
 
@@ -181,6 +186,7 @@ a {
 	li{
 		display: block;
 		margin-bottom: 12px;
+		margin-left: 0px;
 	}
 }
 

@@ -5,6 +5,6 @@
 	"author": "Edison Neo",
 	"private": true,
 	"scripts": {
-		"postinstall": "npm install express"
+		"postinstall": "npm install express connect-history-api-fallback"
 	}
 }

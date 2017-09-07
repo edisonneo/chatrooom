@@ -4,27 +4,33 @@
 			<a @click='joinChat'>Join Chat</a>
 		</template>
 		<template v-if='user && chatAccess'>
-			<p>User admin? {{ isAdmin}}</p>
-			<ul>
-				<li v-for='user in roomUsers'>{{ user.email }}</li>
-			</ul>
-			<a>Invite someone to chat</a>
-			<a @click='leaveChat'>Leave Chat</a>
+			<!-- <p>User admin? {{ isAdmin}}</p> -->
+			<div class="room__header">
+				<div class="wrapper">
+					<ul class='room__list room__list--users'>
+						<li v-for='user in roomUsers'>{{ user.email }}</li>
+					</ul>
+					<ul class='room__list room__list--actions'>
+						<li><a>Invite someone to chat</a></li>
+						<li><a @click='leaveChat'>Leave Chat</a></li>	
+					</ul>
+				</div>
+			</div>
 			<div id="room__chat">
 				<div class="chat__main">
 					<div class="wrapper" ref="chatWrapper" id='chatWrapper'>
 						<div v-for='msg in room.msgs'class="chat__single">
 							<div class="chat__text" :class="msg.user == user.uid ? 'chat__text--user':'chat__text--other'" >
-								<span v-if='!(msg.user == user.uid)'>{{ getUser('email', msg.user) }}</span>
+								<h6 v-if='!(msg.user == user.uid)'>{{ getUser('email', msg.user) }}</h6>
 								<p>{{ msg.text }}</p>
-								<h6>{{ showTimeCreated(msg.created_at) }}</h6>
+								<span>{{ showTimeCreated(msg.created_at) }}</span>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="chat__input">
 					<div class="wrapper">
-						<input id='sendText' type="text" name="message" v-model='pendingMsg.text'>
+						<input id='sendText' type="text" name="message" v-model='pendingMsg.text' placeholder="Type something!">
 						<button id='sendButton' :class="pendingMsg.text.length == 0 ? 'disabled':'' " @click='sendMessage'>Send</button>		
 					</div>
 				</div>
@@ -240,8 +246,6 @@ $orange: #f89414;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
-	margin-top: 60px;
-	padding: 40px 0px 16px;
 }
 
 h1, h2 {
@@ -293,32 +297,67 @@ a {
 	color: #42b983;
 }
 
+.room__header{
+	background: #f1f1f1;
+	.wrapper{
+		display: flex;
+		justify-content: left;
+		max-width: 992px;
+		margin: 0 auto;
+		padding: 0px 12px;
+	}
+}
+
+
+.room__list{
+	li{
+		display: block;
+		text-align: left;
+	}
+	&--actions{
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		li{
+			display: inline;
+			margin-left: 4px;
+		}
+	}
+	&--users{
+
+	}
+}
+
 .chat__main{
 	
 	display: flex;
 	justify-content: center;
 	align-items: center;	
-	margin-top: 40px;
 	flex-wrap: wrap;
-	height: 300px;
+	height: 400px;
 
 	.wrapper{
 		overflow: scroll;
 		height: 100%;
 		max-width: 992px;
 		width: 100%;
-		border-bottom: 1px solid #ddd;
+		padding: 0px 12px;
 	}
 }
 
 .chat__input{
-	padding: 16px 0px;
+	border-top: 1px solid #ddd;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	// position: fixed;
+	// bottom: 0;
+	width: 100%;
+	background: #fff;
 
 	.wrapper{
 		max-width: 992px;
+		padding: 16px 12px;
 		width: 100%;
 		display: flex;
 	}
@@ -359,14 +398,26 @@ a {
 
 .chat__text{
 	display: flex;
-
- 	p{
-		
+	flex-wrap: wrap;
+	padding: 8px 0px;
+	span,p,h6{
+		width: 100%;
+		margin: 4px;
+		text-align: left;
+	}
+	span{
+		font-size: 12px;
+	}
+	h6{
+		font-size: 12px;
+	}
+ 	p{	
 		background: $orange;
 		color: #fff;
 		padding: 12px 20px;
 		width: auto;
 		text-align: left;
+		font-weight: 600;
 		border-radius: 6px;
 	}
 
@@ -375,6 +426,9 @@ a {
 			margin-left: auto;
 			text-align: right;
 			max-width: 400px;
+		}
+		span,p,h6{
+			text-align: right;
 		}
 	}
 }
