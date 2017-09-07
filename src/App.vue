@@ -11,7 +11,8 @@
 					<input v-if='!user' type="email" name="email" id='email' placeholder="Email">
 					<input v-if='!user'type="password" name="password" id='password' placeholder="Password">
 					<button v-if='!user' @click='login'> Log In </button>
-					<button v-if='!user' @click='signup'> Sign Up </button>		
+					<button v-if='!user' @click='signup'> Sign Up </button>	
+					<p :class="warningState ? 'show':'' " id='navWarning'></p>
 					<h2 v-if="room && !user">Sign up with an email to join the chat room!</h2>		
 				</div>
 			</div>
@@ -55,7 +56,8 @@ export default {
 			precision: 6, // default precision
 			db: db, // assign Firebase SDK later,
 			auth: auth,
-			welcome: 'ASDASDASDADSSD',
+			warningState: false,
+			warningEl: null
 		}
 	},
 	computed:{ 
@@ -77,7 +79,9 @@ export default {
 
 	},
 	mounted () {
-	    
+	    this.$nextTick(function(){
+	    	this.warningEl = document.getElementById('navWarning');
+	    });
 	},
 	watch:{
 		'$route': function(){
@@ -101,12 +105,20 @@ export default {
 			this.db.database().ref().push().set(val)
 		},
 		login(){
+			var vm = this;
 			// var provider = this.db.auth.GoogleAuthProvider();
 			var email = document.getElementById('email').value;
 			var password = document.getElementById('password').value;
 
 			var promise = this.auth.signInWithEmailAndPassword(email, password);
-			promise.catch(e => console.log(e.message))
+			promise.then(res=>{
+				vm.warningState = false;
+
+			}).catch(e => {
+				console.log(e.message)
+				vm.warningEl.innerHTML = e.message;
+				vm.warningState = true;
+			})
 
 		},
 		signup(){
@@ -116,12 +128,15 @@ export default {
 
 			var promise = this.auth.createUserWithEmailAndPassword(email, password);
 			promise.then(user =>{
+				vm.warningState = false;
 				vm.db.ref().child("users").child(user.uid).set({
 		      		email: user.email,
 		        });
 			});
 			promise.catch(e => {
 				console.log(e.message);
+				vm.warningEl.innerHTML = e.message;
+				vm.warningState = true;
 				
 			});			
 		},
@@ -258,6 +273,18 @@ button{
 
 }
 
+#navWarning{
+	color: red;
+	margin: 0;
+	height: 0;
+	overflow: hidden;
+	&.show{
+		margin: 8px 0px;
+		height: auto;
+		overflow: auto;
+	}
+}
+
 .nav__bottom{
 	padding: 0px;
 	
@@ -286,7 +313,7 @@ button{
 }
 
 .page-wrapper{
-	padding-top: 14px;
+	padding-top: 28px;
 	width: 100%;
 	height: 100vh;
 }
