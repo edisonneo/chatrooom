@@ -6,6 +6,9 @@
 		<template v-if='user && chatAccess'>
 			<!-- <p>User admin? {{ isAdmin}}</p> -->
 			<div class="room__header">
+				<div class="room__title">
+					<h2>{{ room.name }}</h2>
+				</div>
 				<div class="wrapper">
 					<ul class='room__list room__list--users'>
 						<li><a @click='goBack'>Back</a></li>
@@ -221,7 +224,7 @@ export default {
 			return user[0][prop];
 		},
 		showTimeCreated(date){
-			var time = moment(date).format('H:m a');   
+			var time = moment(date).format('HH:mm a');   
 			return time;
 		},
 		initClipboard(){
@@ -269,6 +272,25 @@ export default {
 <style lang="scss">
 
 $orange: #f89414;
+$tablet-width: 768px;
+$desktop-width: 1024px;
+@mixin phone {
+  @media (max-width: #{$tablet-width - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$tablet-width}) and (max-width: #{$desktop-width - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$desktop-width}) {
+    @content;
+  }
+}
 
 #room {
 	background: #fff;
@@ -331,6 +353,7 @@ a {
 
 .room__header{
 	background: #f1f1f1;
+	padding: 4px 0px 4px;
 
 	.wrapper{
 		display: flex;
@@ -342,9 +365,16 @@ a {
 }
 
 .room__list{
+	margin: 4px 0px;
 	li{
 		display: block;
 		text-align: left;
+		a{
+			@include phone{
+				font-size: 12px;
+			}
+		}
+		
 	}
 	&--actions{
 		margin-left: auto;
@@ -364,6 +394,16 @@ a {
 	a{
 		display: block;
 		margin: 8px 0px;
+	}
+}
+
+.room__title{
+	text-align: center;
+	h2{
+		font-size: 18px;
+		margin: 4px 0px;
+		font-weight: 600;
+
 	}
 }
 

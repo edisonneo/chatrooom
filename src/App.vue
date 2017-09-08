@@ -281,11 +281,22 @@ button{
 		margin: 0px 8px 0px 0px;
 		font-size: 22px;
 		font-weight: bold;
+		@include phone{
+			font-size: 18px;
+		}
 	}
 	h4{
 		margin-left: auto;
 		margin-right: 8px;
 		margin: 0px 8px 0px auto;
+		@include phone{
+			font-size: 11px;
+		}
+	}
+	button{
+		@include phone{
+			font-size: 10px;
+		}
 	}
 
 }

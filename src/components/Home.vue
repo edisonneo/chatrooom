@@ -162,7 +162,7 @@ $orange: #f89414;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
-	padding: 40px 0px 16px;
+	padding: 40px 12px 16px;
 
 	.wrapper{
 
@@ -198,6 +198,7 @@ a {
 	border-radius: 10px;
 	h2{
 		margin: 8px 0px;
+		font-weight: 600;
 	}
 	input{
 		background: #eee;
