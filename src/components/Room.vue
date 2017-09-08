@@ -1,7 +1,7 @@
 <template>
 	<div id="room">
 		<template v-if='!chatAccess'>
-			<a @click='joinChat'>Join Chat</a>
+			<button@click='joinChat'>Join Chat: {{ room.name }}</button>
 		</template>
 		<template v-if='user && chatAccess'>
 			<!-- <p>User admin? {{ isAdmin}}</p> -->
@@ -206,6 +206,7 @@ export default {
 			roomRef.then(res =>{
 				vm.chatAccess = true;
 				vm.scrollChatToBottom();		
+				vm.openNotification('Successfully joined!!', 'success');
 			})	
 			.catch(e =>{
 				console.log(e);
@@ -325,6 +326,7 @@ li {
 
 a {
 	color: #42b983;
+	cursor: pointer;
 }
 
 .room__header{
@@ -338,7 +340,6 @@ a {
 		padding: 0px 12px;
 	}
 }
-
 
 .room__list{
 	li{
