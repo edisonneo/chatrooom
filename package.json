@@ -10,6 +10,7 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
+    "clipboard": "^1.7.1",
     "firebase": "^4.3.0",
     "moment": "^2.18.1",
     "vue": "^2.3.3",

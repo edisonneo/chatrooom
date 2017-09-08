@@ -6,7 +6,7 @@
 				<div class="home__section">
 					<a @click='enterCreateMode'>New Chat Room</a>
 					<template v-if='createRoomMode'>
-						<input  type="text" name="room-name" v-model='pendingRoom.name'>
+						<input type="text" name="room-name" v-model='pendingRoom.name'>
 						<button @click='createRoom'>Create</button>		
 						<button @click='exitCreateMode'>Cancel</button>
 					</template>					
@@ -90,18 +90,30 @@ export default {
 
 		},
 		exitCreateMode(){
+			this.pendingRoom.name = '';
+			this.pendingRoom.users = [];
 			this.createRoomMode = false;
+
 
 		},
 		createRoom(){		
 			var vm = this;
 			var user = vm.user;
+			var invalid = false;
 			
+			this.rooms.forEach(room =>{
+				if(this.pendingRoom.name == room.name){
+					vm.openNotification('Room name exists. Please try another name.','warning')
+					invalid = true;
+				}
+			})
+
 			if(this.pendingRoom.name == ''){
-				console.log('no empty room name');
-				return false;
+				vm.openNotification('Room name is empty','warning');
+				invalid = true;
 			}
-			else{
+
+			if(!invalid){
 				var adminUser = {
 					status: "active",
 					id: user.uid,					
@@ -115,6 +127,7 @@ export default {
 				this.pendingRoom.id = roomRef.key;
 				roomRef.set(this.pendingRoom);				
 				this.exitCreateMode();
+				vm.openNotification('Room ' + this.pendingRoom.name + 'created!!', 'success');
 			}	
 		},
 		enterRoom(room){
@@ -123,7 +136,17 @@ export default {
 			var roomId = room.id;
 			router.push({ name: 'rooms', params: { roomId }}) // -> /user/123
 			// router.push('rooms') // -> /user/123
-		}
+		},
+		openNotification(text, type){
+			var bar = document.getElementById('notificationBar');
+			bar.className = 'isOpen ' + type;
+			bar.innerHTML = text;
+
+			setTimeout(function(){
+				bar.className = '';
+				bar.innerHTML = '';
+			}, 4000)
+		},
 	}
 }
 </script>
@@ -139,7 +162,7 @@ $orange: #f89414;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
-	// padding: 40px 0px 16px;
+	padding: 40px 0px 16px;
 
 	.wrapper{
 

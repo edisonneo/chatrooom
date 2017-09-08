@@ -7,14 +7,19 @@
 			<!-- <p>User admin? {{ isAdmin}}</p> -->
 			<div class="room__header">
 				<div class="wrapper">
-					<!-- <ul class='room__list room__list--users'>
-						<li v-for='user in roomUsers'>{{ user.email }}</li>
-					</ul> -->
+					<ul class='room__list room__list--users'>
+						<li><a @click='goBack'>Back</a></li>
+						<!-- <li v-for='user in roomUsers'>{{ user.email }}</li> -->
+					</ul>
 					<ul class='room__list room__list--actions'>
-						<li><a>Invite someone to chat</a></li>
-						<li><a @click='leaveChat'>Leave Chat</a></li>	
+						<li><a @click='showUsers = !showUsers'>{{ showUsers ? 'Hide':'View'}} Users</a></li>
+						<li><a id="shareLink" :data-clipboard-text="pagePath">Invite someone</a></li>
+						<li v-if='noOfUsers > 1'><a @click='leaveChat'>Leave Chat</a></li>	
 					</ul>
 				</div>
+			</div>
+			<div class="room__users" v-if='showUsers'>
+				<a v-for='user in roomUsers'>{{ user.email }}</a>
 			</div>
 			<div id="room__chat">
 				<div class="chat__main">
@@ -44,6 +49,7 @@
 import * as Firebase from 'firebase'
 import { mapState } from 'vuex';
 import moment from 'moment';
+import Clipboard from 'clipboard';
 
 export default {
 	name: 'room',
@@ -77,7 +83,9 @@ export default {
 			},
 			chatAccess: false,
 			isAdmin: false,
-			scrolled: false
+			scrolled: false,
+			pagePath: window.location.href,
+			showUsers: false
 		}
 	},
 	watch: {
@@ -106,6 +114,10 @@ export default {
 			});
 
 			return result;
+		},
+		noOfUsers(){
+			var vm = this;
+			return	Object.keys(vm.room.users).length
 		}
 	},
 	created(){
@@ -116,6 +128,9 @@ export default {
 		// });
 	},
 	mounted () {
+		this.$nextTick(function(){
+			this.initClipboard();
+		});
 
 	},
 	updated(){
@@ -205,8 +220,17 @@ export default {
 			return user[0][prop];
 		},
 		showTimeCreated(date){
-			var time = moment(date).fromNow();
+			var time = moment(date).format('H:m a');   
 			return time;
+		},
+		initClipboard(){
+			var clipboard = new Clipboard('#shareLink');
+			var vm = this;
+
+			clipboard.on('success', function(e) {
+				vm.openNotification('Link copied to clipboard!', 'success')    
+			    e.clearSelection();
+			});
 		},
 		leaveChat(){
 			var vm = this;
@@ -214,8 +238,7 @@ export default {
 			var users = this.room.users;
 			Object.keys(users).forEach(key => {
 				if(users[key].id == vm.user.uid){
-					
-					var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users/" + key).remove();		
+					var roomRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("users").child(key).remove();		
 					roomRef.then(res=>{
 						console.log('removed')
 						router.push('/');
@@ -223,13 +246,20 @@ export default {
 
 				}
 			});
-			
+			this.openNotification('You have left the room: ' + this.room.name, 'success');
+		},
+		openNotification(text, type){
+			var bar = document.getElementById('notificationBar');
+			bar.className = 'isOpen ' + type;
+			bar.innerHTML = text;
 
-
-
-			
-
-
+			setTimeout(function(){
+				bar.className = '';
+				bar.innerHTML = '';
+			}, 4000)
+		},
+		goBack(){
+			this.$router.push('/');
 		}
 	}
 }
@@ -245,7 +275,7 @@ $orange: #f89414;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
-	color: #2c3e50;
+	position: relative;
 }
 
 h1, h2 {
@@ -299,6 +329,7 @@ a {
 
 .room__header{
 	background: #f1f1f1;
+
 	.wrapper{
 		display: flex;
 		justify-content: left;
@@ -327,6 +358,14 @@ a {
 
 	}
 }
+
+.room__users{
+	a{
+		display: block;
+		margin: 8px 0px;
+	}
+}
+
 
 .chat__main{
 	
@@ -409,7 +448,7 @@ a {
 		font-size: 12px;
 	}
 	h6{
-		font-size: 12px;
+		font-size: 13px;
 	}
  	p{	
 		background: $orange;

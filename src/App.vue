@@ -1,5 +1,9 @@
 <template>
 	<div id="app">
+		<div class="notification-bar">
+			<section id="notificationBar">
+			</section>
+		</div>
 		<div class="nav">
 			<div class='wrapper'>
 				<div class="nav__top">
@@ -113,11 +117,13 @@ export default {
 			var promise = this.auth.signInWithEmailAndPassword(email, password);
 			promise.then(res=>{
 				vm.warningState = false;
+				vm.openNotification('Welcome '+ res.email, "success")
 
 			}).catch(e => {
 				console.log(e.message)
 				vm.warningEl.innerHTML = e.message;
-				vm.warningState = true;
+				// vm.warningState = true;
+				vm.openNotification(e.message, "warning", 2000)
 			})
 
 		},
@@ -132,11 +138,10 @@ export default {
 				vm.db.ref().child("users").child(user.uid).set({
 		      		email: user.email,
 		        });
+		        vm.openNotification('Account '+ user.email + ' has been created!', 'success');
 			});
 			promise.catch(e => {
-				console.log(e.message);
-				vm.warningEl.innerHTML = e.message;
-				vm.warningState = true;
+				vm.openNotification(e.message, "warning", 2000)
 				
 			});			
 		},
@@ -147,7 +152,20 @@ export default {
 		goHome(){
 			var router = this.$router;
 			router.push('/');
-		}
+		},
+		openNotification(text, type, time){
+			if(time == null){
+				time = 4000; 
+			}
+			var bar = document.getElementById('notificationBar');
+			bar.className = 'isOpen ' + type;
+			bar.innerHTML = text;
+
+			setTimeout(function(){
+				bar.className = '';
+				bar.innerHTML = '';
+			}, time)
+		},
 		
 	}
 }
@@ -192,7 +210,6 @@ body{
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
-	margin-top: 60px;
 }
 
 h1, h2 {
@@ -313,9 +330,44 @@ button{
 }
 
 .page-wrapper{
-	padding-top: 28px;
+	padding-top: 75px;
 	width: 100%;
 	height: 100vh;
+}
+
+.notification-bar{
+	width: 100%;
+	position: fixed;
+	display: flex;
+	justify-content: center;
+	z-index: 10;
+	top: 24px;
+	transition: 0.3s;
+	section{
+		max-width: 600px;
+		border-radius: 5px;
+		background: $orange;
+		font-size: 14px;
+		font-weight: 600;
+		color: #fff;
+		transition: 0.3s;
+		height: 0;
+		padding: 0;
+		visibility: hidden;
+		
+		&.isOpen{
+			height: auto;
+			visibility: visible;
+			padding: 12px 24px;
+		}
+		&.warning{
+			background: red;
+		}
+		&.success{
+			background: #00ff00;
+		}
+
+	}
 }
 
 
