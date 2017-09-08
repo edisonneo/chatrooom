@@ -4,7 +4,6 @@
 			<button@click='joinChat'>Join Chat: {{ room.name }}</button>
 		</template>
 		<template v-if='user && chatAccess'>
-			<!-- <p>User admin? {{ isAdmin}}</p> -->
 			<div class="room__header">
 				<div class="room__title">
 					<h2>{{ room.name }}</h2>
@@ -12,7 +11,6 @@
 				<div class="wrapper">
 					<ul class='room__list room__list--users'>
 						<li><a @click='goBack'>Back</a></li>
-						<!-- <li v-for='user in roomUsers'>{{ user.email }}</li> -->
 					</ul>
 					<ul class='room__list room__list--actions'>
 						<li><a @click='showUsers = !showUsers'>{{ showUsers ? 'Hide':'View'}} Users</a></li>
@@ -58,8 +56,6 @@ export default {
 	name: 'room',
 	firebase() {
 		return{
-			// simple syntax, bind as an array by default
-    		// room: this.database.ref('rooms/' + this.$route.roomId),
     		users: this.firebase.database().ref('users'),
     		room: {
     			source: this.firebase.database().ref('rooms/' + this.$route.params.roomId),
@@ -71,10 +67,6 @@ export default {
 		      	readyCallback: function () {
 		      		this.checkUserAccessToChat(this.user);		      		
 		      		this.checkIfUserIsAdmin(this.user);
-		      		this.$nextTick(function () {
-						// this.scrollChatToBottom();
-
-					})
 		      	}
 		    }
 		}
@@ -94,9 +86,6 @@ export default {
 	watch: {
         chatAccess(){
         	this.scrollChatToBottom();
-            //code here executes whenever the uploads array changes 
-            //and runs AFTER the dom is updated, could use this in
-            //the parent component
         }
     },
 	computed: {
@@ -107,7 +96,7 @@ export default {
 			var vm = this
 			var roomUsers = this.room.users;
 			var result = []
-			// console.log(Array.isArray(this.users));
+			
 			this.users.filter(user => {				
 				Object.keys(roomUsers).forEach(key => {		
 				    if(roomUsers[key].id == user['.key']){
@@ -124,11 +113,7 @@ export default {
 		}
 	},
 	created(){
-		// var vm = this;
-		// var msgRef = this.firebase.database().ref('rooms/' + this.$route.params.roomId).child("msgs");
-		// msgRef.on('value', function(snapshot) {
-		// 	console.log('messages changed');
-		// });
+		
 	},
 	mounted () {
 		this.$nextTick(function(){
@@ -163,13 +148,14 @@ export default {
 			});
 
 			this.pendingMsg.text = '';
-		
 		},
 		scrollChatToBottom(){
 			
 			this.$nextTick(function(){
 				var chatWrapper = document.getElementById('chatWrapper');
-				chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
+				if(chatWrapper){
+					chatWrapper.scrollTop = chatWrapper.scrollHeight - chatWrapper.clientHeight;
+				}
 			});
 		},
 		checkUserAccessToChat(user){
@@ -181,12 +167,6 @@ export default {
 					vm.chatAccess = true;
 				}
 			})
-
-			// users.forEach(function(user){
-			// 	if(user.id == uid){
-			// 		vm.chatAccess = true;
-			// 	}
-			// });
 		},
 		checkIfUserIsAdmin(user){
 			var vm = this;
@@ -216,10 +196,8 @@ export default {
 			});
 		},
 		getUser(prop, userId){
-			// console.log(userId);
 			var user = this.users.filter(user=>{
 				return(user['.key'] == userId);
-				// console.log(user['.key'] == userId);
 			});
 			return user[0][prop];
 		},

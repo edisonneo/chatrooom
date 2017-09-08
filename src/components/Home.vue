@@ -31,11 +31,8 @@ import { mapState } from 'vuex';
 
 export default {
 	name: 'home',
-	props: ['authenticate'],
 	firebase() {
-		// const userId = firebase.auth().currentUser.uid
 		return{
-			// simple syntax, bind as an array by default
     		rooms: this.firebase.database().ref('rooms'),
 		}
 	},
@@ -51,16 +48,7 @@ export default {
 		}
 	},
 	mounted () {
-	    this.authenticate.onAuthStateChanged(firebaseUser =>{
-				if(firebaseUser){
-					console.log('yes log in');
-				}
-				else{			
-					console.log('no log in');
-				}
-		});
-
-		// console.log(this.rooms[0].users);
+	 
 	},
 	computed: {
 		
@@ -93,8 +81,6 @@ export default {
 			this.pendingRoom.name = '';
 			this.pendingRoom.users = [];
 			this.createRoomMode = false;
-
-
 		},
 		createRoom(){		
 			var vm = this;
@@ -131,11 +117,9 @@ export default {
 			}	
 		},
 		enterRoom(room){
-			// router.push({ name: 'user', params: { userId }}) // -> /user/123
 			var router = this.$router;
 			var roomId = room.id;
-			router.push({ name: 'rooms', params: { roomId }}) // -> /user/123
-			// router.push('rooms') // -> /user/123
+			router.push({ name: 'rooms', params: { roomId }}) 
 		},
 		openNotification(text, type){
 			var bar = document.getElementById('notificationBar');

@@ -21,13 +21,9 @@
 				</div>
 			</div>
 		</div>	
-		<div class="page-wrapper">
-			
-			<router-view v-if="user" :authenticate="auth"></router-view>	
+		<div class="page-wrapper">			
+			<router-view v-if="user"></router-view>	
 		</div>
-    	
-
-
 	</div>
 </template>
 
@@ -49,15 +45,13 @@ export default {
 	name: 'app',
 	firebase() {
 		return{
-			// simple syntax, bind as an array by default
-    		
+ 
 		}
 	},
 	data() {
 		return {
 			title: 'Chatrooom',
 			room: false,
-			precision: 6, // default precision
 			db: db, // assign Firebase SDK later,
 			auth: auth,
 			warningState: false,
@@ -110,7 +104,6 @@ export default {
 		},
 		login(){
 			var vm = this;
-			// var provider = this.db.auth.GoogleAuthProvider();
 			var email = document.getElementById('email').value;
 			var password = document.getElementById('password').value;
 
@@ -120,9 +113,6 @@ export default {
 				vm.openNotification('Welcome '+ res.email, "success")
 
 			}).catch(e => {
-				console.log(e.message)
-				vm.warningEl.innerHTML = e.message;
-				// vm.warningState = true;
 				vm.openNotification(e.message, "warning", 2000)
 			})
 
